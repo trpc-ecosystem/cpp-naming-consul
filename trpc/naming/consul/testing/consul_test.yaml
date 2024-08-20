@@ -1,0 +1,46 @@
+global:
+  local_ip: 127.0.0.1
+  threadmodel:
+    default:
+      - instance_name: default_instance
+        io_handle_type: separate
+        io_thread_num: 2
+        handle_thread_num: 2
+server:
+    app: test
+    server: helloworld
+    registry_name: consul
+    service:
+      - name: trpc.test.helloworld.Greeter
+        network: tcp
+        ip: 127.0.0.1
+        port: 10001
+        protocol: trpc
+        threadmodel_type: default
+        threadmodel_instance_name: default_instance
+client:
+    service:
+      - name: trpc.test.helloworld.Router
+        target: trpc.test.helloworld.Router
+        selector_name: consul
+        namespace: Development
+        protocol: trpc
+        timeout: 1000
+        network: tcp
+plugins:
+    registry:
+        consul:
+          address: 127.0.0.1:8500
+    selector:
+        consul:
+            address: 127.0.0.1:8500
+    log:
+      default:
+        - name: default
+          min_level: 1 # 0-trace, 1-debug, 2-info, 3-warn, 4-error, 5-critical
+          format: "[%H:%M:%S %z] [thread %t] %v"
+          mode: 1 # 1-synchronous, 2-asynchronous, 3-speed speed
+          sinks:
+            local_file:
+              filename: local_file.testing.log
+              reserve_count: 5
